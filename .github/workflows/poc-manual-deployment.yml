@@ -1,0 +1,28 @@
+name: PoC - workflow_dispatch injection demo
+
+on:
+  workflow_dispatch:
+    inputs:
+      chain_ids:
+        description: "Space-separated chain IDs"
+        required: true
+        default: "84532"
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare fake secrets file (.env)
+        run: |
+          echo "PRIVATE_KEY=FAKE_PRIVATE_KEY_FOR_DEMO" >> .env
+          echo "GAS_SIGNER_MNEMONIC=FAKE_MNEMONIC_FOR_DEMO" >> .env
+          echo "[*] .env created (demo only)"
+
+      - name: Run deployment script (VULNERABLE)
+        run: |
+          CHAIN_IDS="${{ inputs.chain_ids }}"
+          echo "Deploying to chains: $CHAIN_IDS"
+          # Vulnerable: unquoted expansion and passed to a script that executes it in bash -lc
+          ./deploy/execute_config.sh $CHAIN_IDS
