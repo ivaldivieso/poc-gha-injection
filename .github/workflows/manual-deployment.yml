@@ -1,0 +1,26 @@
+name: Manual Deployment (PoC)
+
+on:
+  workflow_dispatch:
+    inputs:
+      chain_ids:
+        description: "Chain IDs (space-separated numbers)"
+        required: true
+        default: "84532"
+
+jobs:
+  poc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Write dummy secrets to .env (simulates real workflow)
+        run: |
+          echo "DUMMY_PRIVATE_KEY=${{ secrets.DUMMY_PRIVATE_KEY }}" >> .env
+          echo "DUMMY_GAS_MNEMONIC=${{ secrets.DUMMY_GAS_MNEMONIC }}" >> .env
+
+      - name: Run deployment script (VULNERABLE)
+        run: |
+          CHAIN_IDS="${{ inputs.chain_ids }}"
+          echo "Deploying to chains: $CHAIN_IDS"
+          ./deploy/execute_config.sh $CHAIN_IDS
